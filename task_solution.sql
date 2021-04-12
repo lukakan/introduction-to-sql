@@ -44,9 +44,61 @@ DELETE FROM employee ORDER BY birth_date DESC LIMIT 1;
 DROP TABLE IF EXISTS employee;
 
 -- 9. Tworzy tabelę stanowisko (nazwa stanowiska, opis, wypłata na danym stanowisku)
+CREATE TABLE position (
+id BIGINT PRIMARY KEY AUTO_INCREMENT,
+pos_name VARCHAR(20),
+pos_description VARCHAR(60),
+pos_salary DECIMAL(10,2));
+
 -- 10. Tworzy tabelę adres (ulica+numer domu/mieszkania, kod pocztowy, miejscowość)
+CREATE TABLE address (
+id BIGINT PRIMARY KEY AUTO_INCREMENT,
+street VARCHAR(20),
+postal_code VARCHAR(6),
+city VARCHAR(15));
+
 -- 11. Tworzy tabelę pracownik (imię, nazwisko) + relacje do tabeli stanowisko i adres
+CREATE TABLE employee (
+id BIGINT PRIMARY KEY AUTO_INCREMENT,
+first_name VARCHAR(15),
+last_name VARCHAR(15),
+position_id BIGINT NOT NULL,
+FOREIGN KEY (position_id) REFERENCES position (id),
+address_id BIGINT NOT NULL,
+FOREIGN KEY (address_id) REFERENCES address (id)); 
+
 -- 12. Dodaje dane testowe (w taki sposób, aby powstały pomiędzy nimi sensowne powiązania)
+INSERT INTO position (pos_name, pos_description, pos_salary) 
+VALUES
+("junior engineer", "engineer on learing mode", 4000),
+("engineer", "product owner", 5000),
+("principal engineer", "leader of product team", 12000);
+
+INSERT INTO address (street, postal_code, city)
+VALUES
+("OKOPOWA 15/2", "00-902", "Warszawa"),
+("Wiejska 4", "00-902", "Warszawa"),
+("Tęczowa 88", "00-902", "Warszawa"),
+("Cudaczna 12", "44-100", "Gliwice");
+
+INSERT INTO employee (first_name, last_name, position_id, address_id)
+VALUES
+("Jan", "Kowalski", 1, 2),
+("Adam", "Niezgódka", 1, 1),
+("Helga", "Drobna", 2, 3),
+("Iwan", "Łagodny", 3, 4);
+
 -- 13. Pobiera pełne informacje o pracowniku (imię, nazwisko, adres, stanowisko)
+SELECT e.first_name, e.last_name, a.postal_code, a.city, a.street, p.pos_name 
+FROM employee AS e
+JOIN address AS a ON e.address_id = a.id
+JOIN position AS p ON e.position_id = p.id;
+
 -- 14. Oblicza sumę wypłat dla wszystkich pracowników w firmie
+SELECT SUM(pos_salary) as sum_of_salaries FROM position AS p
+JOIN employee e ON p.id = e.position_id;
+
 -- 15. Pobiera pracowników mieszkających w lokalizacji z kodem pocztowym 90210 (albo innym, który będzie miał sens dla Twoich danych testowych)
+SELECT e.first_name, e.last_name FROM employee AS e
+JOIN address AS a ON e.address_id = a.id
+WHERE a.postal_code = '00-902';
